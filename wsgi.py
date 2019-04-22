@@ -57,22 +57,24 @@ def route(pre):
     return regist
 
 #自定义的处理器
-@route(r'/index\.py')
-def index(ret):
-    return "xixi"
+@route('/index')
+def index(params):
+    return "主页面"
+@route('/index/about')
+def about(params):
+    return "主页面下的关于页面"
 
 #处理器映射器
 def mapper(env, start_response):
     status = '200 OK'
     response_headers = [('Content-Type', 'text/html;charset=UTF-8')]
     start_response(status, response_headers)
-    for u in url_mapping:
-        ret = re.match(u, env['url'])
-        if ret:
-            try:
-                return url_mapping[u](ret)
-            except Exception as e:
-                print(e)
-                return "系统异常，请稍后再试"
-        else:
+    if env['url'][4:] in url_mapping:
+        print('url='+env['url'][4:])
+        try:
+            return url_mapping[env['url'][4:]](env['params'])
+        except Exception as e:
+            print(e)
+            return "系统异常，请稍后再试"
+    else:
             return "请求的路径无效!"

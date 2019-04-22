@@ -12,10 +12,6 @@ method = None
 
 class WSGIServer(object):
     def __init__(self, port):
-        with open('web_server.conf') as f:
-            conf_dict = eval(f.read())
-            self.static_path = conf_dict['static_path']
-            self.router_suffix = conf_dict['router_suffix']
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.server_socket.bind(('', port))
@@ -46,11 +42,13 @@ class WSGIServer(object):
                     d[key] = value
                 request_url = request_url[:index]
             if request_url == '/':
-                request_url = '/index.py'
+                request_url = '/index.html'
+            elif request_url.endswith('/'):
+                request_url=request_url[:len(request_url)-1]
 
             try:
                 response = 'HTTP/1.1 200 OK\r\n\r\n'
-                if request_url.endswith(self.router_suffix):
+                if request_url.startswith("/api"):
                     env = dict(url=request_url, params=d)
                     html_content = method(env, self.set_response_headers).encode('utf-8')
                     response = 'HTTP/1.1 %s\r\n' % self.status
@@ -58,7 +56,7 @@ class WSGIServer(object):
                         response += '%s: %s\r\n' % (header[0], header[1])
                     response += '\r\n'
                 else:
-                    with open(self.static_path + request_url, 'rb') as f:
+                    with open( './static'+request_url, 'rb') as f:
                         html_content = f.read()
             except Exception as e:
                 print(e)
@@ -68,7 +66,8 @@ class WSGIServer(object):
                 client_socket.send(response.encode('utf-8'))
                 client_socket.send(html_content)
         else:
-            print('客户端请求断开连接')
+            pass
+            # print('客户端请求断开连接')
         client_socket.close()
 
 
