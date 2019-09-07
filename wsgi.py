@@ -2,7 +2,8 @@ import re
 import time
 import urllib.parse
 
-from pymysql import *
+#如果要用到MySQL数据库操作, 请取消下面的注释
+#from pymysql import *
 
 url_mapping = dict()
 
@@ -59,10 +60,10 @@ def route(pre):
 #自定义的处理器
 @route('/index')
 def index(params):
-    return "主页面"
+    return "首页"
 @route('/index/about')
 def about(params):
-    return "主页面下的关于页面"
+    return "关于我们"
 
 #处理器映射器
 def mapper(env, start_response):
